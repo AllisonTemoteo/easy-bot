@@ -1,6 +1,6 @@
-import 'package:easy_bot/core/utils/easy_message_builder.dart';
-import 'package:easy_bot/core/utils/env.dart';
-import 'package:easy_bot/npx/controllers/npx_commands_controller.dart';
+import 'package:easy_bot/utils/easy_message_builder.dart';
+import 'package:easy_bot/utils/env.dart';
+import 'package:easy_bot/controllers/npx_commands_controller.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
@@ -88,38 +88,7 @@ class EasyBot {
       ChatCommand(
         'test_message',
         'Lista as chamadas perdidas em determinado período',
-        (ChatContext ctx) async {
-          // final guildId = Snowflake.parse(int.parse(Env.get('GUILD_ID')));
-          // final guild = await bot.guilds.fetch(guildId);
-
-          // final channelId = Snowflake.parse(1401599830509228164);
-          // final channel =
-          //     await bot.channels.fetch(channelId) as GuildTextChannel;
-
-          // final role = guild.roleList.firstWhere(
-          //   (role) => role.name == 'Patrão',
-          // );
-
-          // var message = BotMessageBuilder(
-          //   header: MessageHeader(
-          //     mentions: MessageMentions(roles: [role]),
-          //     title: MessageContent([
-          //       MessageContentPart('# Atenção! ', isBold: true),
-          //       MessageContentPart('Nova mensagem teste'),
-          //     ]),
-          //   ),
-          //   content: MessageContent([
-          //     MessageContentPart(
-          //       'Teste',
-          //       isBold: true,
-          //       isItalic: true,
-          //       isSpoiler: true,
-          //     ),
-          //   ]),
-          // );
-
-          // ctx.respond(MessageBuilder(content: message.build()));
-        },
+        (ChatContext ctx) async {},
       ),
     );
 

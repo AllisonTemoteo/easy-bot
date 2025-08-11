@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:easy_bot/core/utils/env.dart';
+import 'package:easy_bot/utils/env.dart';
 import 'package:http/http.dart' as http;
 
 enum ReportType {

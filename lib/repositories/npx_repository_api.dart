@@ -1,5 +1,5 @@
-import 'package:easy_bot/npx/models/call_model.dart';
-import 'package:easy_bot/npx/services/npx_api_client.dart';
+import 'package:easy_bot/models/call_model.dart';
+import 'package:easy_bot/services/npx_api_client.dart';
 
 abstract interface class INpxRepositoryApi {
   Future<List<NpxCallModel>?> getMissedCalls(Interval interval);

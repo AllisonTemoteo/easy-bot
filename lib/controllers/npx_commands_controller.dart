@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:easy_bot/core/utils/easy_message_builder.dart';
-import 'package:easy_bot/npx/models/call_model.dart';
-import 'package:easy_bot/npx/repositories/npx_repository_api.dart';
-import 'package:easy_bot/npx/services/npx_api_client.dart';
+import 'package:easy_bot/utils/easy_message_builder.dart';
+import 'package:easy_bot/models/call_model.dart';
+import 'package:easy_bot/repositories/npx_repository_api.dart';
+import 'package:easy_bot/services/npx_api_client.dart';
 import 'package:nyxx/nyxx.dart';
 
 class NpxCommandsController {
