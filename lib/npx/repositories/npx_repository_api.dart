@@ -16,18 +16,19 @@ class Interval {
 }
 
 class NpxRepositoryApi implements INpxRepositoryApi {
-  const NpxRepositoryApi(NpxApiClient client) : _client = client;
+  NpxRepositoryApi(NpxApiClient client) : _client = client;
   final NpxApiClient _client;
 
   @override
   Future<List<NpxCallModel>?> getMissedCalls(Interval interval) async {
     final NpxApiReportParams params = NpxApiReportParams(
+      reportType: ReportType.analytic,
       dateStartedAt: interval.dateTimeStarting,
       dateEndingAt: interval.dateTimeEnding,
       filters: {'status': 'NOT ANSWERED', 'hangupcause': -1},
     );
 
-    final report = await _client.getReport(ReportType.analytic, params);
+    final report = await _client.getReport(params);
 
     if (report != null && report.isNotEmpty) {
       return report.map((call) => NpxCallModel.fromMap(call)).toList();

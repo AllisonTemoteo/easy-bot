@@ -1,21 +1,80 @@
+import 'dart:async';
+
+import 'package:easy_bot/core/utils/easy_message_builder.dart';
 import 'package:easy_bot/npx/models/call_model.dart';
 import 'package:easy_bot/npx/repositories/npx_repository_api.dart';
 import 'package:easy_bot/npx/services/npx_api_client.dart';
+import 'package:nyxx/nyxx.dart';
 
 class NpxCommandsController {
-  final bool monitoring = false;
+  Timer? _monitor;
 
-  Future<List<NpxCallModel>?> startMonitoring() async {
-    final client = NpxApiClient();
-    final api = NpxRepositoryApi(client);
+  Map<String, NpxCallModel> missedCalls = {};
 
-    final DateTime now = DateTime.now();
+  void startMonitoring(Role mention, TextChannel target) {
+    if (_monitor != null) {
+      print("Monitoramento já está ativo");
+      return;
+    }
 
-    return await api.getMissedCalls(
-      Interval(
-        dateTimeStarting: now.subtract(Duration(minutes: 5)),
-        dateTimeEnding: now,
-      ),
-    );
+    final monitoringRefreshTime = Duration(seconds: 2);
+
+    _monitor = Timer.periodic(monitoringRefreshTime, (timer) async {
+      final client = NpxApiClient();
+      final api = NpxRepositoryApi(client);
+
+      try {
+        final DateTime now = DateTime.now();
+
+        final calls = await api.getMissedCalls(
+          Interval(
+            dateTimeStarting: now.subtract(Duration(days: 2)),
+            dateTimeEnding: now,
+          ),
+        );
+        if (calls != null) {
+          for (int i = 0; i < calls.length; i++) {
+            String callId = '${calls[i].callTimeText}${calls[i].callerNumber}';
+            if (missedCalls.containsKey(callId)) {
+              continue;
+            }
+
+            missedCalls[callId] = calls[i];
+
+            var message = BotMessageBuilder(
+              header: MessageHeader(
+                mentions: MessageMentions(
+                  mentions: [
+                    Mention(mentionType: MentionType.role, id: mention.id),
+                  ],
+                ),
+                title: MessageContent([
+                  MessageContentPart(
+                    '# Atenção! Nova chamada perdida',
+                    isBold: true,
+                  ),
+                ]),
+              ),
+              content: MessageContent([
+                MessageContentPart(calls[i].callTimeText),
+                MessageContentPart('```${calls[i].callerNumber}```'),
+              ]),
+            );
+
+            target.sendMessage(MessageBuilder(content: message.build()));
+          }
+        }
+
+        print('$now: $calls');
+      } catch (e) {
+        print('API error');
+      }
+    });
+  }
+
+  void stopMonitoring() {
+    _monitor?.cancel();
+    _monitor = null;
+    print('Monitor stoped');
   }
 }

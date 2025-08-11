@@ -18,5 +18,5 @@ import 'package:easy_bot/bot_config.dart';
 
 void main() async {
   final bot = EasyBot();
-  bot.start();
+  await bot.start();
 }

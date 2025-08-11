@@ -1,109 +1,143 @@
-import 'package:dotenv/dotenv.dart';
+import 'package:easy_bot/core/utils/easy_message_builder.dart';
+import 'package:easy_bot/core/utils/env.dart';
 import 'package:easy_bot/npx/controllers/npx_commands_controller.dart';
 import 'package:nyxx/nyxx.dart';
 import 'package:nyxx_commands/nyxx_commands.dart';
 
 class EasyBot {
   late final NyxxGateway bot;
+  final controller = NpxCommandsController();
+
   final commands = CommandsPlugin(
-    prefix: mentionOr((_) => '!'),
-    options: CommandsOptions(logErrors: true),
+    prefix: null,
+    options: CommandsOptions(logErrors: true, type: CommandType.slashOnly),
   );
 
   void _setCommands() {
     commands.addCommand(
       ChatCommand(
         'ping',
-        'Checks if the bot is online',
-        id('ping', (ChatContext context) async {
-          final gatewayLatency = context.client.gateway.latency.inMilliseconds;
-          final restLatency = context.client.httpHandler.latency.inMilliseconds;
+        'Verifica a disponibilidade do Bot',
+        id('ping', (ChatContext ctx) async {
+          // ctx.respond(MessageBuilder(content: 'Pong!'));
 
-          final embed = EmbedBuilder(
-            fields: [
-              EmbedFieldBuilder(
-                name: 'Gateway latency',
-                value: '${gatewayLatency}ms',
-                isInline: true,
-              ),
-              EmbedFieldBuilder(
-                name: 'REST latency',
-                value: '${restLatency}ms',
-                isInline: true,
-              ),
-            ],
+          final guildId = Snowflake.parse(int.parse(Env.get('GUILD_ID')));
+          final guild = await bot.guilds.fetch(guildId);
+
+          // final channelId = Snowflake.parse(1401599830509228164);
+          // final channel =
+          //     await bot.channels.fetch(channelId) as GuildTextChannel;
+
+          final role = guild.roleList.firstWhere(
+            (role) => role.name == 'Patrão',
           );
 
-          // Get round-trip time
-          final response = await context.respond(
-            MessageBuilder(embeds: [embed]),
+          var message = BotMessageBuilder(
+            header: MessageHeader(
+              mentions: MessageMentions(
+                mentions: [
+                  Mention(mentionType: MentionType.role, id: role.id),
+                  Mention(
+                    mentionType: MentionType.user,
+                    id: Snowflake(183608698545897472),
+                  ),
+                ],
+              ),
+              title: MessageContent([
+                MessageContentPart('# '),
+                MessageContentPart(
+                  'Atenção! Nova mensagem teste',
+                  isBold: true,
+                ),
+              ]),
+            ),
+            content: MessageContent([
+              MessageContentPart('Teste', isBold: true),
+            ]),
           );
-
-          await response.edit(MessageUpdateBuilder(embeds: [embed]));
+          print(message.build());
+          ctx.respond(MessageBuilder(content: message.build()));
         }),
       ),
     );
 
     commands.addCommand(
-      ChatCommand('help', "Get help with commands", (ChatContext ctx) async {
-        await ctx.respond(
-          MessageBuilder(content: '```Use / ou ! para os comandos```'),
-        );
-      }),
-    );
-
-    commands.addCommand(
       ChatCommand(
-        'start',
+        'start_monitoring',
         'Inicia o monitoramento das chamadas perdidas',
-        (ChatContext ctx) {},
+        (ChatContext ctx) async {
+          final guildId = Snowflake.parse(int.parse(Env.get('GUILD_ID')));
+          final guild = await bot.guilds.fetch(guildId);
+
+          final channelId = Snowflake.parse(1401599830509228164);
+          final channel =
+              await bot.channels.fetch(channelId) as GuildTextChannel;
+
+          final role = guild.roleList.firstWhere(
+            (role) => role.name == 'Patrão',
+          );
+
+          controller.startMonitoring(role, channel);
+
+          ctx.respond(MessageBuilder(content: 'Monitoramento ativo'));
+        },
       ),
     );
 
     commands.addCommand(
-      ChatCommand('missed', 'Lista as chamadas perdidas em determinado período', (
-        ChatContext ctx,
-      ) async {
-        final channelId = Snowflake.parse(1401599830509228164);
-        final channel = await bot.channels.fetch(channelId) as GuildTextChannel;
-        final role = ctx.guild!.roleList.firstWhere(
-          (role) => role.name == 'Patrão',
-        );
+      ChatCommand(
+        'test_message',
+        'Lista as chamadas perdidas em determinado período',
+        (ChatContext ctx) async {
+          // final guildId = Snowflake.parse(int.parse(Env.get('GUILD_ID')));
+          // final guild = await bot.guilds.fetch(guildId);
 
-        ctx.respond(MessageBuilder(content: 'Monitoramento ativo'));
+          // final channelId = Snowflake.parse(1401599830509228164);
+          // final channel =
+          //     await bot.channels.fetch(channelId) as GuildTextChannel;
 
-        final response = await NpxCommandsController().startMonitoring();
+          // final role = guild.roleList.firstWhere(
+          //   (role) => role.name == 'Patrão',
+          // );
 
-        if (response != null) {
-          String responseTxt = '<@&${role.id}>\n';
-          for (int i = 0; i < response.length; i++) {
-            responseTxt +=
-                '```${response[i].callDateTime}\t${response[i].callerNumber}\n```';
-          }
+          // var message = BotMessageBuilder(
+          //   header: MessageHeader(
+          //     mentions: MessageMentions(roles: [role]),
+          //     title: MessageContent([
+          //       MessageContentPart('# Atenção! ', isBold: true),
+          //       MessageContentPart('Nova mensagem teste'),
+          //     ]),
+          //   ),
+          //   content: MessageContent([
+          //     MessageContentPart(
+          //       'Teste',
+          //       isBold: true,
+          //       isItalic: true,
+          //       isSpoiler: true,
+          //     ),
+          //   ]),
+          // );
 
-          channel.sendMessage(MessageBuilder(content: responseTxt));
-
-          return;
-        }
-
-        await Future.delayed(Duration(seconds: 2));
-      }),
+          // ctx.respond(MessageBuilder(content: message.build()));
+        },
+      ),
     );
 
     commands.addCommand(
-      ChatCommand('stop', 'Para o monitoramento de chamadas perdidas', (
-        ChatContext ctx,
-      ) async {
-        ctx.respond(MessageBuilder(content: 'Monitoramento inativo'));
-      }),
+      ChatCommand(
+        'stop_monitoring',
+        'Para o monitoramento de chamadas perdidas',
+        (ChatContext ctx) async {
+          controller.stopMonitoring();
+          ctx.respond(MessageBuilder(content: 'Monitoramento inativo'));
+        },
+      ),
     );
   }
 
-  void start() async {
-    final env = DotEnv(includePlatformEnvironment: true)..load();
-
+  Future<void> start() async {
     bot = await Nyxx.connectGateway(
-      env['DISCORD_KEY']!,
+      Env.get('DISCORD_KEY'),
       GatewayIntents.messageContent,
       options: GatewayClientOptions(plugins: [cliIntegration, commands]),
     );

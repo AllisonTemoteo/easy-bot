@@ -11,6 +11,9 @@ class NpxCallModel {
     );
   }
 
+  String get callDateText => callDateTime.toIso8601String().split('T')[0];
+  String get callTimeText => callDateTime.toIso8601String().split('T')[1];
+
   @override
   String toString() {
     return '$runtimeType: {DataHora = $callDateTime, Telefone = $callerNumber}';
