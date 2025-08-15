@@ -1,42 +1,29 @@
 import 'package:nyxx/nyxx.dart';
 
 enum MentionType {
-  role('&'),
-  user('');
+  user('@'),
+  role('@&'),
+  channel('#');
 
   final String value;
   const MentionType(this.value);
 }
 
 class Mention {
-  Mention({required this.mentionType, required this.id});
-  MentionType mentionType;
+  Mention({required this.type, required this.id});
+  MentionType type;
   Snowflake id;
 
-  String get _mentionType => mentionType.value;
-}
+  String get mentionFormated => '<${type.value}$id>';
 
-class MessageMentions {
-  MessageMentions({required this.mentions});
-  List<Mention> mentions;
-
-  String build() {
-    String strMentions = '';
-    String separator = '';
-
-    for (int i = mentions.length - 1; i >= 0; i--) {
-      strMentions =
-          '<@${mentions[i]._mentionType}${mentions[i].id}>'
-          '$separator$strMentions';
-      separator = ', ';
-    }
-
-    return strMentions;
+  @override
+  String toString() {
+    return mentionFormated;
   }
 }
 
-class MessageContentPart {
-  MessageContentPart(
+class MessagePart {
+  MessagePart(
     String part, {
     this.isBold = false,
     this.isItalic = false,
@@ -81,42 +68,23 @@ class MessageContentPart {
 class MessageContent {
   MessageContent(this.parts);
 
-  final List<MessageContentPart> parts;
+  final List<MessagePart> parts;
 
   String build() {
     String content = '';
 
-    for (int i = 0; i < parts.length; i++) {
-      content += parts[i].build();
+    for (var part in parts) {
+      content += part.build();
     }
 
     return content;
   }
 }
 
-class MessageHeader {
-  MessageHeader({MessageMentions? mentions, required MessageContent title})
-    : _mentions = mentions,
-      _title = title;
-
-  final MessageMentions? _mentions;
-  final MessageContent _title;
-
-  String build() {
-    String strMentions = '';
-
-    if (_mentions != null) {
-      strMentions += _mentions.build();
-    }
-
-    return '$strMentions\n${_title.build()}';
-  }
-}
-
 class BotMessageBuilder {
   BotMessageBuilder({this.header, required this.content});
 
-  MessageHeader? header;
+  MessageContent? header;
   MessageContent content;
 
   String build() {
@@ -126,7 +94,6 @@ class BotMessageBuilder {
       strHeader = header!.build();
     }
 
-    return '$strHeader\n'
-        '${content.build()}';
+    return '$strHeader\n${content.build()}';
   }
 }

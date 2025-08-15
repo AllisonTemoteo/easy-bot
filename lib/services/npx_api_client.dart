@@ -53,15 +53,16 @@ class NpxApiClient {
       body: jsonEncode(body),
       headers: {
         'Content-Type': 'application/json',
-        'Access-token': Env.get('NPX_API_KEY'),
+        'Access-token': Env.get('NPX_API_TOKEN'),
       },
     );
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      print('API response: [${response.statusCode}] => ${response.body}');
+      return null;
     }
 
-    print('API error: ${response.body}');
-    return null;
+    print('API response: [200] => ${response.body}');
+    return jsonDecode(response.body);
   }
 }

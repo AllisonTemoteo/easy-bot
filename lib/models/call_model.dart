@@ -1,5 +1,5 @@
 class NpxCallModel {
-  const NpxCallModel({required this.callDateTime, required this.callerNumber});
+  NpxCallModel({required this.callDateTime, required this.callerNumber});
 
   final DateTime callDateTime;
   final String callerNumber;
@@ -11,8 +11,9 @@ class NpxCallModel {
     );
   }
 
+  String get id => callTime + callerNumber;
   String get callDateText => callDateTime.toIso8601String().split('T')[0];
-  String get callTimeText => callDateTime.toIso8601String().split('T')[1];
+  String get callTime => callDateTime.toIso8601String().split('T')[1];
 
   @override
   String toString() {
