@@ -1,18 +1,7 @@
 import 'dart:async';
-
-import 'package:easy_bot/config/app_config.dart';
 import 'package:easy_bot/config/bot_config.dart';
 import 'package:easy_bot/utils/env.dart';
-import 'package:easy_bot/utils/message.dart';
-import 'package:easy_bot/utils/message_sender.dart';
-import 'package:nyxx/nyxx.dart'
-    show
-        GatewayClientOptions,
-        GatewayIntents,
-        Nyxx,
-        NyxxGateway,
-        cliIntegration,
-        logging;
+import 'package:nyxx/nyxx.dart';
 
 class EasyBot {
   EasyBot._internal();
@@ -57,39 +46,29 @@ class EasyBot {
               .toStringAsFixed(3);
 
       if (event.mentions.contains(botUser)) {
-        final Message teste = Message(
-          mentions: [AppConfig().roles['Patrão']!],
-          template: 'Mensagem teste agora: {time}',
-          placeholders: {'{time}': DateTime.now()},
+        event.message.channel.sendMessage(
+          MessageBuilder(
+            content: '# Hi, there',
+            embeds: [
+              EmbedBuilder(
+                color: DiscordColor.fromRgb(0, 255, 0),
+                title: 'EasyBot',
+                fields: [
+                  EmbedFieldBuilder(
+                    name: 'Latency',
+                    value: formattedLatency,
+                    isInline: true,
+                  ),
+                  EmbedFieldBuilder(
+                    name: 'Version',
+                    value: '0.0.3p',
+                    isInline: true,
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
-
-        MessageSender.sendToChannel(
-          teste,
-          AppConfig().textChannels['teste-easybot']!,
-        );
-        // event.message.channel.sendMessage(
-        //   MessageBuilder(
-        //     content: '# Hi, there',
-        //     embeds: [
-        //       EmbedBuilder(
-        //         color: DiscordColor.fromRgb(0, 255, 0),
-        //         title: 'EasyBot',
-        //         fields: [
-        //           EmbedFieldBuilder(
-        //             name: 'Latency',
-        //             value: formattedLatency,
-        //             isInline: true,
-        //           ),
-        //           EmbedFieldBuilder(
-        //             name: 'Version',
-        //             value: '0.0.2p',
-        //             isInline: true,
-        //           ),
-        //         ],
-        //       ),
-        //     ],
-        //   ),
-        // );
       }
     });
 
