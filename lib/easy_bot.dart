@@ -1,34 +1,105 @@
 import 'dart:async';
 
-import 'package:easy_bot/bot_tasks.dart';
+import 'package:easy_bot/config/app_config.dart';
+import 'package:easy_bot/config/bot_config.dart';
 import 'package:easy_bot/utils/env.dart';
-import 'package:nyxx/nyxx.dart';
+import 'package:easy_bot/utils/message.dart';
+import 'package:easy_bot/utils/message_sender.dart';
+import 'package:nyxx/nyxx.dart'
+    show
+        GatewayClientOptions,
+        GatewayIntents,
+        Nyxx,
+        NyxxGateway,
+        cliIntegration,
+        logging;
 
 class EasyBot {
   EasyBot._internal();
   static EasyBot? _instance;
-  static Future<EasyBot> get instance async => _instance ??= await _init();
+  static Future<EasyBot> get instance async =>
+      _instance ??= await _initInstance();
 
-  static NyxxGateway? _client;
-  NyxxGateway get client => _client!;
+  static late final NyxxGateway _client;
+  NyxxGateway get client => _client;
 
-  static Future<EasyBot> _init() async {
-    var easyBot = EasyBot._internal();
+  static late final BotConfig _botConfig;
 
-    _client ??= await Nyxx.connectGateway(
+  static Future<EasyBot> _initInstance() async {
+    if (_instance != null) {
+      return _instance!;
+    }
+
+    _instance = EasyBot._internal();
+
+    _client = await Nyxx.connectGateway(
       Env.get('DISCORD_TOKEN'),
       GatewayIntents.allUnprivileged,
       options: GatewayClientOptions(plugins: [logging, cliIntegration]),
     );
 
-    _client!.onReady.listen((event) async {
+    _client.onReady.listen((event) async {
+      print('Setting bot configs');
+
+      _botConfig = BotConfig.instance;
+
       print('Bot ready');
 
-      print('Setting tasks');
-      final monitoreMissedCallsTask = MonitoreMissedCallsTask();
-      monitoreMissedCallsTask.start(Duration(seconds: 30));
+      final task = _botConfig.getTaskByName('monitoreMissedCalls');
+      task.execPeriodic(Duration(seconds: 30));
     });
 
-    return easyBot;
+    _client.onMessageCreate.listen((event) async {
+      final botUser = await _client.users.fetchCurrentUser();
+      final latency = _client.httpHandler.latency;
+      final formattedLatency =
+          (latency.inMicroseconds / Duration.microsecondsPerMillisecond)
+              .toStringAsFixed(3);
+
+      if (event.mentions.contains(botUser)) {
+        final Message teste = Message(
+          mentions: [AppConfig().roles['Patrão']!],
+          template: 'Mensagem teste agora: {time}',
+          placeholders: {'{time}': DateTime.now()},
+        );
+
+        MessageSender.sendToChannel(
+          teste,
+          AppConfig().textChannels['teste-easybot']!,
+        );
+        // event.message.channel.sendMessage(
+        //   MessageBuilder(
+        //     content: '# Hi, there',
+        //     embeds: [
+        //       EmbedBuilder(
+        //         color: DiscordColor.fromRgb(0, 255, 0),
+        //         title: 'EasyBot',
+        //         fields: [
+        //           EmbedFieldBuilder(
+        //             name: 'Latency',
+        //             value: formattedLatency,
+        //             isInline: true,
+        //           ),
+        //           EmbedFieldBuilder(
+        //             name: 'Version',
+        //             value: '0.0.2p',
+        //             isInline: true,
+        //           ),
+        //         ],
+        //       ),
+        //     ],
+        //   ),
+        // );
+      }
+    });
+
+    _client.onMessageReactionAdd.listen((ctx) async {
+      final botUser = await _client.users.fetchCurrentUser();
+      if (ctx.messageAuthor == botUser) {
+        ctx.message.delete();
+      }
+    });
+
+    return _instance!;
   }
 }

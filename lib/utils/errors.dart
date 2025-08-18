@@ -7,3 +7,7 @@ class AppException implements Exception {
     return '$runtimeType: $message';
   }
 }
+
+class AppIOException extends AppException {
+  AppIOException(super.message);
+}

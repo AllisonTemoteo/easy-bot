@@ -5,6 +5,10 @@ import 'package:easy_bot/repositories/npx_repository_api.dart';
 import 'package:easy_bot/services/npx_api_client.dart';
 
 class NpxController {
+  NpxController._internal();
+  static NpxController? _instance;
+  static NpxController get instance => _instance ??= NpxController._internal();
+
   Map<String, NpxCallModel> missedCalls = {};
 
   Future<List<NpxCallModel>?> getNewMissedCalls() async {
@@ -15,7 +19,7 @@ class NpxController {
 
     final report = await repository.getMissedCalls(
       Interval(
-        dateTimeStarting: now.subtract(Duration(minutes: 5)),
+        dateTimeStarting: now.subtract(Duration(minutes: 2)),
         dateTimeEnding: now,
       ),
     );
