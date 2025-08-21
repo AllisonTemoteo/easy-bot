@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:easy_bot/utils/errors.dart';
 import 'package:path/path.dart';
 
-class FileService {
-  final String _base = Directory.current.path;
+abstract class FileService {
+  static final String _base = join(Directory.current.path, 'bin');
 
-  void createFile(String path, String name) async {
+  static void createFile(String path, String name) async {
     final fileDir = join(_base, path);
     final fileFullName = join(fileDir, name);
 
@@ -17,23 +17,23 @@ class FileService {
     }
   }
 
-  Future<String> readAsString(String path) async {
+  static String readAsString(String path) {
     final filePath = join(_base, path);
     final file = File(filePath);
 
     try {
-      return await file.readAsString();
+      return file.readAsStringSync();
     } catch (e) {
       throw AppIOException('Não foi possível ler o arquivo em $path\n$e');
     }
   }
 
-  Future<void> writeAsString(String path, String content) async {
+  static void writeAsString(String path, String content) {
     final filePath = join(_base, path);
     final file = File(filePath);
 
     try {
-      await file.writeAsString(content);
+      file.writeAsStringSync(content);
     } catch (e) {
       throw AppIOException('Não foi possível escrever no arquivo $path\n$e');
     }

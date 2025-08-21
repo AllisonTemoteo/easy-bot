@@ -1,0 +1,50 @@
+{
+  "guild_id": "1351940769652412448",
+  "guild_name": "EasyAssist",
+  "roles": [
+    {
+      "id": "1352332142146748540",
+      "name": "Atendimento",
+      "type": "role"
+    }
+  ],
+  "users": [
+    {
+      "id": "183608698545897472",
+      "name": "bleque",
+      "agent_code": "0000",
+      "type": "user"
+    },
+    {
+      "id": "1351940126586179584",
+      "name": "Douglas Anderson",
+      "agent_code": "0000",
+      "type": "user"
+    }
+  ],
+  "channels": [
+    {
+      "id": "1408105631780704453",
+      "name": "ligações-perdidas",
+      "type": "text_channel"
+    }
+  ],
+  "messages": [
+    {
+      "name": "newMissedCall",
+      "receiver": {
+        "id": "1401599830509228164",
+        "name": "teste-easybot",
+        "type": "text_channel"
+      },
+      "mentions": [
+        {
+          "id": "1134131241915003003",
+          "name": "Patrão",
+          "type": "role"
+        }
+      ],
+      "template": "# Atenção! Nova ligação perdida\n{time}\n```{number}```"
+    }
+  ]
+}

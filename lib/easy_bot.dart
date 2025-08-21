@@ -1,84 +1,22 @@
 import 'dart:async';
-import 'package:easy_bot/config/bot_config.dart';
-import 'package:easy_bot/utils/env.dart';
-import 'package:nyxx/nyxx.dart';
+import 'package:easy_bot/config/app_config.dart';
+import 'package:easy_bot/services/nyxx/nyxx_service.dart';
 
 class EasyBot {
-  EasyBot._internal();
+  EasyBot._internal({required this.appConfig});
+
   static EasyBot? _instance;
   static Future<EasyBot> get instance async =>
       _instance ??= await _initInstance();
 
-  static late final NyxxGateway _client;
-  NyxxGateway get client => _client;
-
-  static late final BotConfig _botConfig;
+  final AppConfig appConfig;
 
   static Future<EasyBot> _initInstance() async {
-    if (_instance != null) {
-      return _instance!;
-    }
+    await NyxxService.instance;
 
-    _instance = EasyBot._internal();
+    final appConfig = await AppConfig.instance;
+    appConfig.bot.startTasks();
 
-    _client = await Nyxx.connectGateway(
-      Env.get('DISCORD_TOKEN'),
-      GatewayIntents.allUnprivileged,
-      options: GatewayClientOptions(plugins: [logging, cliIntegration]),
-    );
-
-    _client.onReady.listen((event) async {
-      print('Setting bot configs');
-
-      _botConfig = BotConfig.instance;
-
-      print('Bot ready');
-
-      final task = _botConfig.getTaskByName('monitoreMissedCalls');
-      task.execPeriodic(Duration(seconds: 30));
-    });
-
-    _client.onMessageCreate.listen((event) async {
-      final botUser = await _client.users.fetchCurrentUser();
-      final latency = _client.httpHandler.latency;
-      final formattedLatency =
-          (latency.inMicroseconds / Duration.microsecondsPerMillisecond)
-              .toStringAsFixed(3);
-
-      if (event.mentions.contains(botUser)) {
-        event.message.channel.sendMessage(
-          MessageBuilder(
-            content: '# Hi, there',
-            embeds: [
-              EmbedBuilder(
-                color: DiscordColor.fromRgb(0, 255, 0),
-                title: 'EasyBot',
-                fields: [
-                  EmbedFieldBuilder(
-                    name: 'Latency',
-                    value: formattedLatency,
-                    isInline: true,
-                  ),
-                  EmbedFieldBuilder(
-                    name: 'Version',
-                    value: '0.0.3p',
-                    isInline: true,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      }
-    });
-
-    _client.onMessageReactionAdd.listen((ctx) async {
-      final botUser = await _client.users.fetchCurrentUser();
-      if (ctx.messageAuthor == botUser) {
-        ctx.message.delete();
-      }
-    });
-
-    return _instance!;
+    return EasyBot._internal(appConfig: appConfig);
   }
 }

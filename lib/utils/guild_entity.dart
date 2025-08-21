@@ -1,53 +1,75 @@
-import 'package:nyxx/nyxx.dart';
+import 'package:easy_bot/utils/errors.dart';
 
-abstract class GuildEntity {
+sealed class GuildEntity {
   GuildEntity({required this.id, required this.name});
-  final Snowflake id;
+  final int id;
   final String name;
 
-  GuildEntity fromMap(Map<String, Object> map);
-  Map<String, Object> toMap();
-}
+  String get mentionFormat;
 
-class _GuildEntity extends GuildEntity {
-  _GuildEntity({required super.id, required super.name});
-
-  @override
-  GuildEntity fromMap(Map<String, Object> map) {
-    final Snowflake id = Snowflake.parse(map['id'] as String);
-    return GuildRole(id: id, name: map['name'] as String);
-  }
-
-  @override
   Map<String, Object> toMap() {
-    return {'id': id.toString(), 'name': name};
+    return {'id': id, 'name': name};
+  }
+
+  factory GuildEntity.fromMap(Map<String, Object?> map) {
+    switch (map['type'] as String) {
+      case 'text_channel':
+        return TextChannel.fromMap(map);
+      case 'role':
+        return Role.fromMap(map);
+      case 'user':
+        return User.fromMap(map);
+      default:
+        throw AppException('Unknown GuildEntity type ${map['type']}');
+    }
   }
 }
 
-class GuildTextChannel extends _GuildEntity {
-  GuildTextChannel({required super.id, required super.name});
+class TextChannel extends GuildEntity {
+  TextChannel({required super.id, required super.name});
+
+  @override
+  String get mentionFormat => '<#$id>';
+
+  factory TextChannel.fromMap(Map<String, Object?> map) {
+    return TextChannel(
+      id: int.parse(map['id'] as String),
+      name: map['name'] as String,
+    );
+  }
 }
 
-class GuildRole extends _GuildEntity {
-  GuildRole({required super.id, required super.name});
+class Role extends GuildEntity {
+  Role({required super.id, required super.name});
+
+  @override
+  String get mentionFormat => '<@&$id>';
+
+  factory Role.fromMap(Map<String, Object?> map) {
+    return Role(
+      id: int.parse(map['id'] as String),
+      name: map['name'] as String,
+    );
+  }
 }
 
-class GuildUser extends _GuildEntity {
-  GuildUser({required super.id, required super.name, required this.agentCode});
+class User extends GuildEntity {
+  User({required super.id, required super.name, this.agentCode = '0000'});
   final String agentCode;
 
   @override
-  GuildUser fromMap(Map<String, Object> map) {
-    final Snowflake id = Snowflake.parse(map['id'] as String);
-    return GuildUser(
-      id: id,
-      name: map['name'] as String,
-      agentCode: map['agent_code'] as String,
-    );
-  }
+  String get mentionFormat => '<@$id>';
 
   @override
   Map<String, Object> toMap() {
     return {'agent_code': agentCode, ...super.toMap()};
+  }
+
+  factory User.fromMap(Map<String, Object?> map) {
+    return User(
+      id: int.parse(map['id'] as String),
+      name: map['name'] as String,
+      agentCode: map['agent_code'] as String? ?? '0000',
+    );
   }
 }

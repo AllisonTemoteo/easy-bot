@@ -1,52 +1,71 @@
-import 'package:easy_bot/bot_tasks.dart';
-import 'package:easy_bot/easy_bot.dart';
-import 'package:easy_bot/utils/action.dart';
+import 'package:easy_bot/config/bot_config.dart';
+import 'package:easy_bot/services/config_service.dart';
+import 'package:easy_bot/utils/env.dart';
 import 'package:easy_bot/utils/guild_entity.dart';
-import 'package:nyxx/nyxx.dart' show Snowflake, TextChannel;
 
 class AppConfig {
-  AppConfig();
+  AppConfig._internal({
+    required this.guildId,
+    required this.guildName,
+    required this.channels,
+    required this.roles,
+    required this.users,
+  });
 
-  Map<String, GuildTextChannel> textChannels = {
-    'teste-easybot': GuildTextChannel(
-      id: Snowflake(1401599830509228164),
-      name: 'teste-easybot',
-    ),
-  };
+  static AppConfig? _instance;
+  static Future<AppConfig> get instance async => _instance ??= await _init();
 
-  Map<String, GuildRole> roles = {
-    'Patrão': GuildRole(id: Snowflake(1134131241915003003), name: 'Patrão'),
-  };
+  static BotConfig? _botConfig;
+  BotConfig get bot => _botConfig!;
 
-  Map<String, GuildRole> users = {
-    'Patrão': GuildRole(id: Snowflake(183608698545897472), name: 'bleque'),
-  };
+  final int guildId;
+  final String guildName;
+  final List<Role> roles;
+  final List<User> users;
+  final List<TextChannel> channels;
 
-  Map<String, Task> tasks = {};
-  Map<String, Action> actions = {};
+  static Future<AppConfig> _init() async {
+    final env = Env.get('ENV', defaultValue: 'dev');
 
-  Snowflake get guildId => Snowflake(1134130266001133648);
+    final configs = ConfigService('config.$env.json');
 
-  Future<TextChannel?> fetchTextChannel(String name) async {
-    final easyBot = await EasyBot.instance;
-    final client = easyBot.client;
+    var guildId = configs.guildId;
+    var guildName = configs.guildName;
 
-    final textChannelId = textChannels[name]?.id;
+    final roles = configs
+        .roles //
+        .map(Role.fromMap)
+        .toList();
 
-    if (textChannelId != null) {
-      return await client.channels.fetch(textChannels[name]!.id) as TextChannel;
-    }
+    final channels = configs
+        .channels //
+        .map(TextChannel.fromMap)
+        .toList();
 
-    return null;
+    final users = configs
+        .users //
+        .map(User.fromMap)
+        .toList();
+
+    final appConfig = AppConfig._internal(
+      guildId: guildId,
+      guildName: guildName,
+      roles: roles,
+      users: users,
+      channels: channels,
+    );
+
+    _botConfig = BotConfig.instance;
+
+    return appConfig;
   }
 
-  void registerTask(Task task) {
-    print('Registering task: ${task.name}');
-    tasks[task.name] = task;
-  }
+  User getUserByName(String name) =>
+      users.firstWhere((user) => user.name == name);
 
-  void registerActions(Action action) {
-    print('Registering action: ${action.name}');
-    actions[action.name] = action;
-  }
+  Role getRoleByName(String name) =>
+      roles.firstWhere((role) => role.name == name);
+
+  TextChannel getChannelByName(String name) =>
+      channels.firstWhere((channel) => channel.name == name);
 }

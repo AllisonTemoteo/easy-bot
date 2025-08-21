@@ -1,0 +1,98 @@
+{
+  "guild_id": "1134130266001133648",
+  "guild_name": "DEVando",
+  "roles": [
+    {
+      "id": "1134131241915003003",
+      "name": "Patrão",
+      "type": "role"
+    }
+  ],
+  "users": [
+    {
+      "id": "183608698545897472",
+      "name": "bleque",
+      "agent_code": "0000",
+      "type": "user"
+    },
+    {
+      "id": "1351940126586179584",
+      "name": "Douglas Anderson",
+      "agent_code": "0000",
+      "type": "user"
+    }
+  ],
+  "channels": [
+    {
+      "id": "1401599830509228164",
+      "name": "teste-easybot",
+      "type": "text_channel"
+    }
+  ],
+  "messages": [
+    {
+      "name": "newMissedCall",
+      "receiver": {
+        "id": "1401599830509228164",
+        "name": "teste-easybot",
+        "type": "text_channel"
+      },
+      "mentions": [
+        {
+          "id": "1134131241915003003",
+          "name": "Patrão",
+          "type": "role"
+        }
+      ],
+      "template": "# Atenção! Nova ligação perdida\n{time}\n```{number}```"
+    }
+  ],
+  "bot": {
+    "tasks": [
+      {
+        "name": "monitoreMissedCalls",
+        "desc": "Monitora ligações perdidas",
+        "delay": null,
+        "exec_interval": "00:00:30",
+        "exec_params": {
+          "key": "value"
+        },
+        "is_active": false,
+        "actions": [
+          {
+            "name": "getMissedCalls",
+            "params": {
+              "last_minutes": "1"
+            }
+          },
+          {
+            "name": "formatMessage",
+            "params": {
+              "last_minutes": "1"
+            }
+          },
+          {
+            "name": "sendMessage",
+            "params": {
+              "receiver": {
+                "id": "1401599830509228164",
+                "name": "teste-easybot",
+                "type": "text_channel"
+              },
+              "message": {
+                "mentions": [
+                  {
+                    "id": "1134131241915003003",
+                    "name": "Patrão",
+                    "type": "role"
+                  }
+                ],
+                "template": "# Atenção! Nova ligação perdida\n{time}\n```{number}```"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

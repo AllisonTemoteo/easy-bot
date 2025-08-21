@@ -2,14 +2,39 @@ import 'package:easy_bot/utils/guild_entity.dart';
 
 class Message {
   Message({
-    required this.mentions,
+    required this.name,
     required this.template,
-    required this.placeholders,
+    this.mentions,
+    this.placeholders,
   });
 
-  final List<GuildEntity>? mentions;
+  factory Message.fromMap(Map<String, dynamic> map) {
+    final name = map['name'];
+    final template = map['template'] as String;
+    final placeholders = map['placeholders'] as Map<String, Object>?;
+
+    final mentionsMap = (map['mentions'] as List)
+        .map((e) => Map<String, String>.from(e as Map))
+        .toList();
+
+    final mentions = mentionsMap
+        .map((e) => Map<String, String>.from(e as Map))
+        .toList()
+        .map(GuildEntity.fromMap)
+        .toList();
+
+    return Message(
+      name: name,
+      mentions: mentions,
+      template: template,
+      placeholders: placeholders,
+    );
+  }
+
+  final String name;
   final String template;
-  final Map<String, Object> placeholders;
+  final List<GuildEntity>? mentions;
+  Map<String, Object>? placeholders;
 
   String get content {
     var content = StringBuffer();
@@ -17,24 +42,13 @@ class Message {
     if (mentions != null) {
       String separator = '';
       for (int i = mentions!.length - 1; i >= 0; i--) {
-        if (mentions![i] is GuildRole) {
-          content.write('<@&${mentions![i].id}>$separator');
-        }
-
-        if (mentions![i] is GuildUser) {
-          content.write('<@${mentions![i].id}>$separator');
-        }
-
-        if (mentions![i] is GuildTextChannel) {
-          content.write('<#&${mentions![i].id}>$separator');
-        }
-
+        content.write(mentions![i].mentionFormat + separator);
         separator = ', ';
       }
     }
 
     content.write('\n');
-    content.write(_resolvePlaceholders());
+    content.write(placeholders == null ? template : _resolvePlaceholders());
 
     return content.toString();
   }
@@ -46,7 +60,7 @@ class Message {
       final key = match.group(1)?.trim();
       if (key == null) return match.group(0)!;
 
-      final value = placeholders[key];
+      final value = placeholders![key];
 
       return value?.toString() ?? match.group(0)!;
     });
