@@ -62,7 +62,17 @@ class NpxApiClient {
       return null;
     }
 
-    print('API response: [200] => ${response.body}');
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+
+    if (data is Map<String, dynamic>) {
+      print(data);
+      return null;
+    }
+
+    if (data is List<dynamic> && data.isNotEmpty) {
+      print('API response: [200] => ${response.body}');
+    }
+
+    return data;
   }
 }

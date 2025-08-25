@@ -11,7 +11,7 @@ class NpxController {
 
   Map<String, NpxCallModel> missedCalls = {};
 
-  Future<List<NpxCallModel>?> getNewMissedCalls() async {
+  Future<List<NpxCallModel>?> getNewMissedCalls(Duration lastMinutes) async {
     final client = NpxApiClient();
     final repository = NpxRepositoryApi(client);
 
@@ -19,7 +19,7 @@ class NpxController {
 
     final report = await repository.getMissedCalls(
       Interval(
-        dateTimeStarting: now.subtract(Duration(minutes: 2)),
+        dateTimeStarting: now.subtract(lastMinutes),
         dateTimeEnding: now,
       ),
     );

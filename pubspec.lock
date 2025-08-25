@@ -81,14 +81,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  dart_style:
-    dependency: transitive
-    description:
-      name: dart_style
-      sha256: "1efa911ca7086affd35f463ca2fc1799584fb6aa89883cf0af8e3664d6a02d55"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.2"
   dotenv:
     dependency: "direct main"
     description:
@@ -121,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  fuzzywuzzy:
-    dependency: transitive
-    description:
-      name: fuzzywuzzy
-      sha256: "3004379ffd6e7f476a0c2091f38f16588dc45f67de7adf7c41aa85dec06b432c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
   glob:
     dependency: transitive
     description:
@@ -233,14 +217,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.7.0"
-  nyxx_commands:
-    dependency: "direct main"
-    description:
-      name: nyxx_commands
-      sha256: f2cd72f94ab4741e230a179b65bbfd0b91eef2bbe060bd73e1dc40c1e6b2673d
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.4"
   oauth2:
     dependency: transitive
     description:
